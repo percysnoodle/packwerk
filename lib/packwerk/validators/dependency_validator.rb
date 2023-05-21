@@ -25,6 +25,8 @@ module Packwerk
         [
           "enforce_dependencies",
           "dependencies",
+          "test_dependencies",
+          "test_files",
         ]
       end
 
@@ -48,6 +50,22 @@ module Packwerk
 
           unless setting.is_a?(Array)
             errors << "\tInvalid 'dependencies' option: #{setting.inspect} in #{config.inspect}"
+          end
+        end
+
+        package_manifests_settings_for(configuration, "test_dependencies").each do |config, setting|
+          next if setting.nil?
+
+          unless setting.is_a?(Array)
+            errors << "\tInvalid 'test_dependencies' option: #{setting.inspect} in #{config.inspect}"
+          end
+        end
+
+        package_manifests_settings_for(configuration, "test_files").each do |config, setting|
+          next if setting.nil?
+
+          unless setting.is_a?(Array)
+            errors << "\tInvalid 'test_files' option: #{setting.inspect} in #{config.inspect}"
           end
         end
 

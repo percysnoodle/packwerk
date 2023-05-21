@@ -34,6 +34,28 @@ module Packwerk
       refute checker.invalid_reference?(reference)
     end
 
+    test "rejects non-test references to a test-time dependency" do
+      source_package = Package.new(
+        name: "components/sales",
+        config: { "enforce_dependencies" => true, "test_dependencies" => ["components/destination"] }
+      )
+      checker = dependency_checker
+      reference = build_reference(source_package: source_package)
+
+      assert checker.invalid_reference?(reference)
+    end
+
+    test "allows tests to reference constants of a test-time dependency" do
+      source_package = Package.new(
+        name: "components/sales",
+        config: { "enforce_dependencies" => true, "test_dependencies" => ["components/destination"] }
+      )
+      checker = dependency_checker
+      reference = build_reference(source_package: source_package, path: "test/some/path.rb")
+
+      refute checker.invalid_reference?(reference)
+    end
+
     private
 
     def dependency_checker

@@ -10,12 +10,19 @@ module Packwerk
     include Comparable
 
     ROOT_PACKAGE_NAME = "."
+    DEFAULT_TEST_GLOBS = T.let(["test/**.rb", "spec/**.rb"], T::Array[String])
 
     sig { returns(String) }
     attr_reader :name
 
     sig { returns(T::Array[String]) }
     attr_reader :dependencies
+
+    sig { returns(T::Array[String]) }
+    attr_reader :test_dependencies
+
+    sig { returns(T::Array[String]) }
+    attr_reader :test_files
 
     sig { returns(T::Hash[T.untyped, T.untyped]) }
     attr_reader :config
@@ -25,6 +32,8 @@ module Packwerk
       @name = name
       @config = T.let(config || {}, T::Hash[String, T.untyped])
       @dependencies = T.let(Array(@config["dependencies"]).freeze, T::Array[String])
+      @test_dependencies = T.let(Array(@config["test_dependencies"]).freeze, T::Array[String])
+      @test_files = T.let(@config["test_files"] || DEFAULT_TEST_GLOBS, T::Array[String])
       @public_path = T.let(nil, T.nilable(String))
     end
 
@@ -36,6 +45,18 @@ module Packwerk
     sig { params(package: Package).returns(T::Boolean) }
     def dependency?(package)
       @dependencies.include?(package.name)
+    end
+
+    sig { params(package: Package).returns(T::Boolean) }
+    def test_dependency?(package)
+      @test_dependencies.include?(package.name)
+    end
+
+    sig { params(filename: String).returns(T::Boolean) }
+    def test_file?(filename)
+      test_files.any? do |glob|
+        File.fnmatch?(glob, filename)
+      end
     end
 
     sig { params(path: String).returns(T::Boolean) }
